@@ -1,5 +1,11 @@
 <template>
-  <div>HelloWorld!</div>
+  <Header/>
+  <Sidebar/>
+  <div class="content-box">
+    <div class="content">
+      <router-view/>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">

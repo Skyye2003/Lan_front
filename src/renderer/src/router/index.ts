@@ -1,14 +1,25 @@
 // renderer/src/router/index.ts
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 
 // 引入你的组件
 import Home from '../views/Home.vue';
 
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: Home
+    redirect: '/dashboard',
+  },
+  {
+    path: '/',
+    component: Home,
+    children: [
+      {
+        path: '/dashboard',
+        name: 'dashboard',
+        component: () => import('../views/dashboard.vue')
+      }
+    ]
   },
 
 ];
