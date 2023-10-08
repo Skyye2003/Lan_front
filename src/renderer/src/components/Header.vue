@@ -1,7 +1,11 @@
 <template>
   <div class="header">
+    <!-- 标题 -->
     <div class="header-title">
-      <span>模拟文件系统</span>
+      <span >模拟文件系统</span>
+    </div>
+    <div class="button-group">
+
     </div>
   </div>
 </template>
@@ -12,11 +16,13 @@
 
 <style scoped lang="less">
 .header {
-  position: relative;
-  box-sizing: border-box;
-  width: 100%;
-  height: 70px;
-  font-size: 22px;
-  color: rgba(109, 119, 154, 0.97);
+  .header-title {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #d4e8ef;
+  }
 }
+
+
 </style>

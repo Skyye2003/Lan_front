@@ -22,9 +22,12 @@
   "dependencies": {
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^2.0.0",
+    "@element-plus/icons-vue": "^2.1.0",
+    "axios": "^1.5.0",
     "electron-updater": "^6.1.1",
     "element-plus": "^2.3.14",
     "pinia": "^2.1.6",
+    "qs": "^6.11.2",
     "vue-router": "^4.2.4"
   },
   "devDependencies": {

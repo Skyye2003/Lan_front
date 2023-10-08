@@ -1,11 +1,18 @@
 <template>
-  <Header/>
-  <Sidebar/>
-  <div class="content-box">
-    <div class="content">
+  <el-container direction="vertical" class="wrapper">
+    <el-header>
+      <Header/>
+    </el-header>
+    <el-main>
+      <navibar/>
       <router-view/>
-    </div>
-  </div>
+    </el-main>
+    <el-footer>
+      <span style="color: #d4e8ef">非常好项目，爱来自计维</span>
+    </el-footer>
+  </el-container>
+
+
 </template>
 
 <script setup lang="ts">
@@ -13,6 +20,9 @@
 
 </script>
 
-<style scoped>
-
+<style scoped lang="less">
+.el-main {
+  display: flex;
+  flex-direction: column;
+}
 </style>

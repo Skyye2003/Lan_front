@@ -12,6 +12,6 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn';
 </template>
 
 <style lang="less">
-@import './assets/css/styles.less';
 @import './assets/css/main.css';
+
 </style>

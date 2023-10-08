@@ -24,6 +24,22 @@ export default defineConfig({
       }),
       Components({
         resolvers: [ElementPlusResolver()],
-      }),]
-  }
+      }),
+    ],
+    server: {
+      host: 'localhost',
+      port: 8085, // 端口号
+      open: false, // 是否自动打开浏览器
+      proxy: {
+        ["/proxy"]: {
+          target: "http://localhost:8088",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/proxy/, ""),
+        },
+
+      },
+
+    },
+  },
+
 })
