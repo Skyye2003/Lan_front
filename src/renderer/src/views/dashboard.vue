@@ -5,20 +5,22 @@
     <!-- 这里使用.stop防止事件传递到父元素 -->
     <el-card v-if="hasFile" v-for="(item) in itemData" @click="handleSelectOnce(item)" @contextmenu.stop="openContextMenu($event, item)">
       <div class="card-content" :class="{'selected': item.selected}">
-        <i v-if="item.attribute == 4" class="iconfont icon-file-fill"></i>
-        <i v-else class="iconfont icon-File"></i>
+        <i v-if="item.attribute == 8" class="iconfont icon-File"></i>
+        <i v-else class="iconfont icon-file-fill"></i>
         <span>{{item.name}}</span>
       </div>
     </el-card>
     <el-empty v-else description="该目录下没有文件！"/>
+    <CreateFileForm :cur-start-id="currentStartId" :visible="showCreateFileForm" @close="handleChildClose"></CreateFileForm>
     <ContextMenu :visible="showContextMenu" :options-num="contextMenuOptions" :position="contextMenuPosition" @FileAction="handleFileAction"></ContextMenu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getItemList } from "../api/api";
-import { ref, inject, watchEffect } from "vue";
+import { deleteFile, getItemList } from "../api/api";
+import { ref, watchEffect } from "vue";
 import { useEventStore } from "../store/event";
+import { ElMessage, ElMessageBox } from "element-plus";
 interface item {
   name: string,
   type: string,
@@ -59,6 +61,10 @@ const showContextMenu = ref(false)
 const contextMenuOptions = ref(0)
 //事件触发store
 const eventStore = useEventStore();
+//是否打开新建文件或者文件夹的表单
+const showCreateFileForm = ref(false)
+//当前所在的盘块号（根目录为3）
+const currentStartId = ref(3)
 
 //监听navibar的事件，触发了执行对应的操作
 watchEffect(() => {
@@ -79,6 +85,8 @@ const handleNavibarEvent = (nextPath: any) => {
     case 2:
       //返回主页
       console.log('返回主页')
+      //更新当前盘块号
+      currentStartId.value = 3
       path.value = '/'
       _getItemList()
       break
@@ -153,36 +161,84 @@ const handleFileAction = (index: number) => {
       break
     case 2:
       console.log("删除")
+      ElMessageBox.confirm(
+        '是否确认删除?',
+        '警告',
+        {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      )
+        .then(() => {
+          //进行删除操作
+          console.log(oldChoice.value)
+          console.log({
+            curStartId: currentStartId.value,
+            delStartId: oldChoice.value.startId,
+            delName: oldChoice.value.name + '.' + oldChoice.value.type
+          })
+
+          deleteFile({
+            curStartId: currentStartId.value,
+            delStartId: oldChoice.value.startId,
+            delName: oldChoice.value.name + '.' + oldChoice.value.type
+          }).then(res => {
+            console.log(res)
+            if (res.data.code == 200) {
+              ElMessage.success('删除成功')
+              _getItemList()
+            } else {
+              ElMessage.error(res.data.message)
+            }
+          })
+
+        })
+        .catch(() => {
+          ElMessage({
+            type: 'info',
+            message: '已取消删除',
+          })
+        })
       break
     case 3:
       console.log("属性")
       break
     case 4:
       console.log("新建")
+      showCreateFileForm.value = true
       break
     case 5:
       console.log("刷新")
+      ElMessage.success('刷新成功')
       _getItemList()
       break
   }
   showContextMenu.value = false
 }
 
-
+//子组件关闭事件
+const handleChildClose = (params: boolean) => {
+  _getItemList()
+  showCreateFileForm.value = params
+}
 
 //给获取到的数据新增字段
 const _getItemList = async () => {
   const { data } = await getItemList({path: path.value})
+  //更新当前盘块号
+  currentStartId.value = data.data.curDirStartId
   //判断该目录下是否有东西
-  if (data.data !== null) {
+  if (data.data.list !== null) {
     hasFile.value = true
-    itemData.value = data.data.map((item: any) => ({
+    itemData.value = data.data.list.map((item: any) => ({
       ...item,
       selected: false
     }))
   } else {
     hasFile.value = false
   }
+  console.log("当前打开的目录的盘块号为：" + currentStartId.value)
 
 }
 _getItemList()
