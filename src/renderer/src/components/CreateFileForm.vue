@@ -1,9 +1,9 @@
 <!-- 新建文件或者文件夹表单 -->
 <template>
-  <el-dialog title="新建" v-model="props.visible" @close="handleClose">
+  <el-dialog :title="props.editItem.selected ? '属性' : '新建'" v-model="props.visible" @close="handleClose" @open="handleItemFill">
     <el-form :model="FormItem" :rules="rules" ref="ruleFormRef" label-width="100">
       <el-form-item label="类型" prop="createType">
-        <el-select v-model="createType" placeholder="请选择类型" @change="handleChange">
+        <el-select v-model="createType" placeholder="请选择类型" @change="handleChange" :disabled="props.editItem.selected">
           <el-option label="文件" value="file"></el-option>
           <el-option label="文件夹" value="folder"></el-option>
         </el-select>
@@ -52,6 +52,7 @@ import { reactive, ref } from "vue";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import { Check, Close } from '@element-plus/icons-vue'
 import { createDir, createFile } from "../api/api";
+import { item } from "../views/dashboard.vue";
 
 interface fileItem {
   fileName: string,
@@ -62,7 +63,8 @@ interface fileItem {
 
 interface propsType {
   visible: boolean,
-  curStartId: number
+  curStartId: number,
+  editItem: item
 }
 
 //向父组件发送事件
@@ -78,6 +80,16 @@ const props = withDefaults(defineProps<propsType>(), {
   },
   curStartId: () => {
     return 3
+  },
+  editItem: () => {
+    return {
+      name: '',
+      type: '',
+      attribute: 0,
+      startId: 0,
+      len: 0,
+      selected: false
+    }
   }
 
 })
@@ -110,6 +122,31 @@ const rules = reactive<FormRules>({
 
 //创建的是文件还是文件夹
 const createType = ref('file')
+
+//当处于编辑状态时，将编辑项填充到表单中
+const handleItemFill = () => {
+  if (props.editItem.selected) {
+    //根据属性判断是文件还是文件夹
+    if (props.editItem.attribute == 8) {
+      createType.value = 'folder'
+      Object.assign(FormItem.value, {
+        fileName: props.editItem.name,
+        type: '',
+        attribute: 4,
+        readonly: false
+      })
+
+    } else {
+      createType.value = 'file'
+      Object.assign(FormItem.value, {
+        fileName: props.editItem.name,
+        type: props.editItem.type,
+        attribute: props.editItem.attribute - (props.editItem.attribute % 2 == 1 ? 1 : 0),
+        readonly: props.editItem.attribute % 2 == 1
+      })
+    }
+  }
+}
 
 //当选择的是文件夹是自动填充后缀名
 const handleChange = (value: string) => {
@@ -170,6 +207,23 @@ const submitForm = async (data: FormInstance | undefined) => {
 
 
 const handleClose = () => {
+  //退出界面时将props.editItem恢复为默认值
+  Object.assign(props.editItem, {
+    name: '',
+    type: '',
+    attribute: 0,
+    startId: 0,
+    len: 0,
+    selected: false
+  })
+  //清空FormItem
+  Object.assign(FormItem.value, {
+    fileName: "",
+    type: "",
+    attribute: 4,
+    readonly: false
+  })
+  console.log(props.editItem)
   emit("close", false)
 }
 </script>

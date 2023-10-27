@@ -18,7 +18,13 @@ const routes: RouteRecordRaw[] = [
         path: '/dashboard',
         name: 'dashboard',
         component: () => import('../views/dashboard.vue')
-      }
+      },
+      {
+        path: '/edit',
+        name: 'edit',
+        component: () => import('../views/FileEditingPage.vue'),
+        props: route => ({ query: route.query.name, query1: route.query.startId })
+      },
     ]
   },
 

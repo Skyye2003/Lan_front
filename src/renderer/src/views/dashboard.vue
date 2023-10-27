@@ -1,19 +1,27 @@
 <!-- 文件页面 -->
 <template>
-
-  <div class="container" @click="handleBGClick" @contextmenu="openContextMenu($event, null)">
-    <!-- 这里使用.stop防止事件传递到父元素 -->
-    <el-card v-if="hasFile" v-for="(item) in itemData" @click="handleSelectOnce(item)" @contextmenu.stop="openContextMenu($event, item)">
-      <div class="card-content" :class="{'selected': item.selected}">
-        <i v-if="item.attribute == 8" class="iconfont icon-File"></i>
-        <i v-else class="iconfont icon-file-fill"></i>
-        <span>{{item.name}}</span>
-      </div>
-    </el-card>
-    <el-empty v-else description="该目录下没有文件！"/>
-    <CreateFileForm :cur-start-id="currentStartId" :visible="showCreateFileForm" @close="handleChildClose"></CreateFileForm>
-    <ContextMenu :visible="showContextMenu" :options-num="contextMenuOptions" :position="contextMenuPosition" @FileAction="handleFileAction"></ContextMenu>
+  <div class="main">
+    <navibar/>
+    <div class="container" @click="handleBGClick" @contextmenu="openContextMenu($event, null)">
+      <!-- 这里使用.stop防止事件传递到父元素 -->
+      <el-card v-if="hasFile" v-for="(item) in itemData" @click="handleSelectOnce(item)" @contextmenu.stop="openContextMenu($event, item)">
+        <div class="card-content" :class="{'selected': item.selected}">
+          <i v-if="item.attribute == 8" class="iconfont icon-File"></i>
+          <i v-else class="iconfont icon-file-fill"></i>
+          <span>{{item.name}}</span>
+        </div>
+      </el-card>
+      <el-empty v-else description="该目录下没有文件！"/>
+      <CreateFileForm
+        :cur-start-id="currentStartId"
+        :visible="showCreateFileForm"
+        :edit-item="oldChoice"
+        @close="handleChildClose">
+      </CreateFileForm>
+      <ContextMenu :visible="showContextMenu" :options-num="contextMenuOptions" :position="contextMenuPosition" @FileAction="handleFileAction"></ContextMenu>
+    </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
@@ -21,7 +29,8 @@ import { deleteFile, getItemList } from "../api/api";
 import { ref, watchEffect } from "vue";
 import { useEventStore } from "../store/event";
 import { ElMessage, ElMessageBox } from "element-plus";
-interface item {
+import { useRouter } from "vue-router";
+export interface item {
   name: string,
   type: string,
   attribute: number,
@@ -49,6 +58,9 @@ const oldChoice = ref<item>({
   len: 0,
   selected: false
 })
+
+
+
 //该路径下是否有文件
 const hasFile = ref(false)
 //当前目录路径
@@ -65,6 +77,8 @@ const eventStore = useEventStore();
 const showCreateFileForm = ref(false)
 //当前所在的盘块号（根目录为3）
 const currentStartId = ref(3)
+//路由组件
+const router = useRouter()
 
 //监听navibar的事件，触发了执行对应的操作
 watchEffect(() => {
@@ -158,6 +172,11 @@ const handleFileAction = (index: number) => {
         eventStore.sendDataFromDashboard(oldChoice.value.name)
         _getItemList()
       }
+      //如果是文件，打开文件
+      else {
+        console.log(path.value)
+        router.push(`/edit?name=${path.value + oldChoice.value.name + '.' + oldChoice.value.type}&startId=${oldChoice.value.startId}`)
+      }
       break
     case 2:
       console.log("删除")
@@ -203,6 +222,7 @@ const handleFileAction = (index: number) => {
       break
     case 3:
       console.log("属性")
+      showCreateFileForm.value = true
       break
     case 4:
       console.log("新建")
@@ -246,6 +266,11 @@ _getItemList()
 </script>
 
 <style scoped lang="less">
+.main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 .card {
   height: 90px;
   width: 90px;

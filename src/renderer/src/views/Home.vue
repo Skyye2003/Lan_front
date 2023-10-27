@@ -4,7 +4,7 @@
       <Header/>
     </el-header>
     <el-main>
-      <navibar/>
+
       <router-view/>
     </el-main>
     <el-footer>
@@ -21,8 +21,5 @@
 </script>
 
 <style scoped lang="less">
-.el-main {
-  display: flex;
-  flex-direction: column;
-}
+
 </style>
